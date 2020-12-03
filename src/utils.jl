@@ -32,8 +32,13 @@ function parent_ring_change(poly::MPolyElem, new_ring::MPolyRing)
         )
     end
     builder = MPolyBuildCtx(new_ring)
+    one_new = one(new_ring.base_ring)
     for term in zip(exponent_vectors(poly), coeffs(poly))
         exp, coef = term
+        # detecting Singular.n_unknown
+        if (typeof(coef) <: Singular.n_unknown) && !(typeof(one_new) <: Singular.n_unknown)
+            coef = Singular.libSingular.julia(Singular.libSingular.cast_number_to_void(coef.ptr))
+        end
         new_exp = [0 for _ in gens(new_ring)]
         for i in 1:length(exp)
             if exp[i] != 0
