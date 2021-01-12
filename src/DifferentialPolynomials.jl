@@ -200,15 +200,18 @@ function Base.:*(a::DiffRingElem, b::DiffRingElem)
     return parent(a)(algdata(a) * algdata(b))
 end
 
-function Base.:*(a::DiffRingElem, b)
-    return parent(a)(algdata(a) * b)
+function Base.:*(a::RingElem, b::DiffRingElem)
+    if typeof(a) <: DiffRingElem
+        return parent(a)(algdata(a) * algdata(b))
+    end
+    return parent(b)(a * algdata(b))
 end
 
-function Base.:*(a, b::DiffRingElem)
-    return parent(b)(algdata(b) * a)
-end
+#function Base.:*(a, b::DiffRingElem)
+#    return parent(b)(algdata(b) * a)
+#end
 
-function Base.:*(a::Union{AbstractFloat, Integer, Rational, Nemo.fmpq}, b::DiffRingElem)
+function Base.:*(a::Union{AbstractFloat, Integer, Rational}, b::DiffRingElem)
     return parent(b)(a * algdata(b))
 end
 
@@ -317,6 +320,18 @@ end
 
 function AbstractAlgebra.total_degree(p::DiffPoly)
     return total_degree(algdata(p))
+end
+
+function AbstractAlgebra.gcd(a::DiffPoly, b::DiffPoly)
+    return DiffPoly(parent(a), gcd(algdata(a), algdata(b)))
+end
+
+function AbstractAlgebra.coeffs(a::DiffPoly)
+    return coeffs(algdata(a))
+end
+
+function AbstractAlgebra.divexact(p::DiffPoly, q::DiffPoly)
+    return DiffPoly(parent(p), divexact(algdata(p), algdata(q)))
 end
 
 #------------------------------------------------------------------------------
@@ -471,16 +486,25 @@ end
 
 #------------------------------------------------------------------------------
 
-function wronskian(polys::Array{DiffPoly, 1})
+# orders must be sorted in the nondecreasing order
+function wronskian(polys::Array{DiffPoly, 1}, orders::Array{<: Integer, 1})
     R = parent(polys[1])
     n = length(polys)
     S = AbstractAlgebra.MatrixSpace(R, n, n)
     W = zero(S)
     for (i, p) in enumerate(polys)
-        W[i, 1] = p
+        W[i, 1] = d(p, orders[1])
         for j in 2:n
-            W[i, j] = d(W[i, j - 1])
+            W[i, j] = d(W[i, j - 1], orders[j] - orders[j - 1])
         end
     end
     return W
+end
+
+function wronskian(polys::Array{DiffPoly, 1})
+    return wronskian(polys, [i - 1 for i in 1:length(polys)])
+end
+
+function wronskian(polys::Array{DiffPoly, 1}, ind_to_omit::Integer)
+    return wronskian(polys, [i for i in 0:length(polys) if i != ind_to_omit])
 end
