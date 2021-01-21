@@ -484,6 +484,28 @@ function Generic.evaluate(a::DiffRingElem, eval_point::Array{<: Any, 1})
     return evaluate_alg(a, eval_point_alg)
 end
 
+function Generic.evaluate(a::DiffRingElem, to_eval::Array{<: Any, 1}, values::Array{<: Any, 1})
+    eval_dict = Dict()
+    R = parent(a)
+    for g in gens(R.poly_ring)
+        dg = R(g)
+        eval_dict[dg] = dg
+    end
+    for (e, v) in zip(to_eval, values)
+        while true
+            eval_dict[e] = v
+            try 
+                e = d(e)
+                v = d(v)
+            catch e
+                break
+            end
+        end
+    end
+    eval_point_alg = [get(eval_dict, R(v), zero(R)) for v in gens(R.poly_ring)]
+    return evaluate_alg(a, eval_point_alg)
+end
+
 #------------------------------------------------------------------------------
 
 # orders must be sorted in the nondecreasing order
