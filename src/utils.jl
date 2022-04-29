@@ -1,5 +1,3 @@
-using AbstractAlgebra
-
 # Function taken from the elimination project, to insert a reference
 #------------------------------------------------------------------------------
 
@@ -38,6 +36,9 @@ function parent_ring_change(poly::MPolyElem, new_ring::MPolyRing)
         # detecting Singular.n_unknown
         if (typeof(coef) <: Singular.n_unknown) && !(typeof(one_new) <: Singular.n_unknown)
             coef = Singular.libSingular.julia(Singular.libSingular.cast_number_to_void(coef.ptr))
+        end
+        if (typeof(coef) <: Singular.FieldElemWrapper) 
+            coef = coef.data
         end
         new_exp = [0 for _ in gens(new_ring)]
         for i in 1:length(exp)
@@ -97,7 +98,7 @@ function extract_coefficients(poly::P, variables::Array{P, 1}) where P <: MPolyE
     indices = [var_to_ind[v] for v in variables]
 
     coeff_vars = filter(v -> !(var_to_str(v) in map(var_to_str, variables)), gens(parent(poly)))
-    new_ring, new_vars = PolynomialRing(base_ring(parent(poly)), map(var_to_str, coeff_vars))
+    new_ring, new_vars = AbstractAlgebra.PolynomialRing(base_ring(parent(poly)), map(var_to_str, coeff_vars))
     coeff_var_to_ind = Dict([(v, findfirst(e -> (e == v), gens(parent(poly)))) for v in coeff_vars])
     FieldType = typeof(one(base_ring(new_ring)))
 

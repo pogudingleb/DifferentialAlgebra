@@ -1,10 +1,6 @@
-using Singular
-
-include("DifferentialPolynomials.jl")
-
 # Should not be here?
-AbstractAlgebra.needs_parentheses(x::Singular.n_unknown{Nemo.fmpq}) = false
-AbstractAlgebra.needs_parentheses(x::Singular.n_unknown{AbstractAlgebra.Generic.Frac{Nemo.fmpq_mpoly}}) = true
+#AbstractAlgebra.needs_parentheses(x::Singular.n_unknown{Nemo.fmpq}) = false
+#AbstractAlgebra.needs_parentheses(x::Singular.n_unknown{AbstractAlgebra.Generic.Frac{Nemo.fmpq_mpoly}}) = true
 
 #------------------------------------------------------------------------------
 
