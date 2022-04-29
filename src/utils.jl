@@ -31,7 +31,7 @@ function parent_ring_change(poly::MPolyElem, new_ring::MPolyRing)
     end
     builder = MPolyBuildCtx(new_ring)
     one_new = one(new_ring.base_ring)
-    for term in zip(exponent_vectors(poly), coeffs(poly))
+    for term in zip(exponent_vectors(poly), coefficients(poly))
         exp, coef = term
         # detecting Singular.n_unknown
         if (typeof(coef) <: Singular.n_unknown) && !(typeof(one_new) <: Singular.n_unknown)
@@ -104,7 +104,7 @@ function extract_coefficients(poly::P, variables::Array{P, 1}) where P <: MPolyE
 
     result = Dict{Array{Int, 1}, Dict{Array{Int, 1}, FieldType}}()
 
-    for (monom, coef) in zip(exponent_vectors(poly), coeffs(poly))
+    for (monom, coef) in zip(exponent_vectors(poly), coefficients(poly))
         var_slice = [monom[i] for i in indices]
         if !haskey(result, var_slice)
             result[var_slice] = Dict{Array{Int, 1}, FieldType}()
